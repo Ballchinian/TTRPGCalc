@@ -66,11 +66,19 @@ export function currentBattleHasContent() {
 
 //Aggregates a recap history ({ [round]: [entries] }) into comparison metrics. Damage figures come
 //straight from the recap entries the simulator already computes, so this never re-resolves anything.
-export function summarizeRecap(recap = {}) {
+//`parties` (the saved battle's { heroes, foes }) lets us split damage output by the acting side; names
+//are unique across both parties, so actorName -> side is unambiguous. Omit it and the split stays 0.
+export function summarizeRecap(recap = {}, parties = null) {
+    const sideByName = new Map();
+    (parties?.heroes ?? []).forEach(c => sideByName.set(c.name, "hero"));
+    (parties?.foes ?? []).forEach(c => sideByName.set(c.name, "foe"));
+
     const summary = {
         rounds: Object.keys(recap).length,
         actions: 0,
         totalDamage: 0,
+        heroDamage: 0,        //damage dealt by hero-side actors
+        foeDamage: 0,         //damage dealt by foe-side actors
         conditionDamage: 0,   //extra damage attributed to conditions (frightened, enfeebled, ...) via per-condition impacts
         offGuardDamage: 0,    //"if off-guard" damage gain the recap tracks separately from conditionBreakdown
         critSpecDamage: 0,
@@ -81,10 +89,14 @@ export function summarizeRecap(recap = {}) {
 
     Object.values(recap).forEach(entries => {
         (entries ?? []).forEach(e => {
+            const dmg = e.totalDamage ?? 0;
             summary.actions += 1;
-            summary.totalDamage += e.totalDamage ?? 0;
+            summary.totalDamage += dmg;
+            const side = sideByName.get(e.actorName);
+            if (side === "hero") summary.heroDamage += dmg;
+            else if (side === "foe") summary.foeDamage += dmg;
             summary.offGuardDamage += e.totalOffGuardGain ?? 0;
-            summary.byActor[e.actorName] = (summary.byActor[e.actorName] ?? 0) + (e.totalDamage ?? 0);
+            summary.byActor[e.actorName] = (summary.byActor[e.actorName] ?? 0) + dmg;
             (e.critSpecImpacts ?? []).forEach(c => { summary.critSpecDamage += c.damage ?? c.damageGain ?? 0; });
             Object.entries(e.conditionBreakdown ?? {}).forEach(([name, dmg]) => {
                 summary.conditionDamage += dmg;

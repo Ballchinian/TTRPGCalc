@@ -12,7 +12,9 @@ const fmtDate = (d) => (d ? new Date(d).toLocaleString() : "");
 const METRICS = [
     { key: "rounds", label: "Rounds" },
     { key: "actions", label: "Actions taken" },
-    { key: "totalDamage", label: "Total damage" },
+    { key: "totalDamage", label: "Total damage (both sides)" },
+    { key: "heroDamage", label: "Hero party damage" },
+    { key: "foeDamage", label: "Foe party damage" },
     { key: "conditionDamage", label: "Damage added by conditions" },
     { key: "offGuardDamage", label: "Off-guard contribution" },
     { key: "critSpecDamage", label: "Crit-spec damage" },
@@ -88,8 +90,8 @@ function SavedBattles() {
         try {
             const [a, b] = await Promise.all([getSavedBattle(aId), getSavedBattle(bId)]);
             setComparison({
-                a: { name: a.name, summary: summarizeRecap(a.data?.recap) },
-                b: { name: b.name, summary: summarizeRecap(b.data?.recap) },
+                a: { name: a.name, summary: summarizeRecap(a.data?.recap, a.data?.battle?.parties) },
+                b: { name: b.name, summary: summarizeRecap(b.data?.recap, b.data?.battle?.parties) },
             });
         } catch (err) {
             setError(err.message);
