@@ -187,11 +187,11 @@ export const resolveActionHelper = (tempActiveActor, tempTargetCharacters, actio
         if (chooseEntries.length > 0) {
             pendingOutcomes = chooseEntries.map(e => {
                 const charRef = adjustedTargetCharacters.find(c => c.id === e.id);
-                //Apply resistance/weakness/immunity to pre-computed resolvedValues per outcome
+                //Apply resistance/weakness/immunity to precomputed resolvedValues per outcome
                 const resolvedOutcomes = {};
                 const multTable = e.reverseOutcome ? BASIC_SAVE_MULTIPLIER_TABLE : MULTIPLIER_TABLE;
                 Object.entries(e.resolvedOutcomes ?? {}).forEach(([key, effects]) => {
-                    //Apply resistance/weakness/immunity to pre-computed resolvedValues
+                    //Apply resistance/weakness/immunity to precomputed resolvedValues
                     const adjusted = effects.map(eff => {
                         if (eff.type !== "damage" || eff.resolvedValue == null) return eff;
                         return { ...eff, resolvedValue: applyDamageModifiers(eff.resolvedValue, eff.damageType, charRef ?? {}) };

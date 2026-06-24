@@ -152,7 +152,7 @@ export function getBravadoActions(classOption) {
 //All actions the character's feature/style grants beyond the global actions: feature-level
 //grantsActions (e.g. Barbarian Rage) plus the chosen style's bravado actions (e.g. Rascal -> Dirty
 //Trick, Tumble Through). Global bravado actions (Grapple/Trip/Demoralize) are included here but are
-//already available to everyone, so the frontend de-dupes them against the global list.
+//already available to everyone, so the frontend dedupes them against the global list.
 export function getFeatureActions(classOption) {
     const f = featureOf(classOption);
     if (!f) return [];

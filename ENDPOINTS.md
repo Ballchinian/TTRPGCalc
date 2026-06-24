@@ -50,7 +50,7 @@ Sign in with Google. The client obtains a Google ID token (via the Google Identi
 
 ### Input
 
-* `credential` — the Google ID token (JWT)
+* `credential`: the Google ID token (JWT)
 
 ### Effects
 
@@ -75,7 +75,7 @@ Sign in with Facebook. The client obtains a Facebook user access token (via the 
 
 ### Input
 
-* `access_token` — the Facebook user access token
+* `access_token`: the Facebook user access token
 
 ### Effects
 

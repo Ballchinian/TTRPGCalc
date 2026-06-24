@@ -5,7 +5,7 @@ import SpellTraitController from "./SpellTraitController";
 import AddDamage from "./AddDamage";
 import { SPELL_TRADITIONS } from "../../../data/spellTraditions";
 
-//Static tier lists defined at module level to avoid re-creation on every render
+//Static tier lists defined at module level to avoid recreating them on every render
 const AC_TIERS = [
     { identity: "criticalSuccess", label: "Crit Success" },
     { identity: "success", label: "Success" },

@@ -4,7 +4,7 @@ import CharacterCard from "./CharacterCard";
 
 const gridStyle = { display: "flex", flexWrap: "wrap", justifyContent: "center", paddingTop: "10px" };
 
-//MemoizedCard: skips re-render when the individual character prop hasn't changed
+//MemoizedCard: skips rerender when the individual character prop hasn't changed
 const MemoizedCard = memo(CharacterCard);
 
 //Takes only `side`, reads its character list and all selection state from the store.

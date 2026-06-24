@@ -71,7 +71,7 @@ export async function resolveTurn({ strikeRider = null, versatileDamageType = nu
             : (fresh.spells?.find(s => s.name === action.selected) ?? null);
     }
     if ((actionType === "weapon" || actionType === "spell") && !actionData) {
-        setError(`Could not find action data for "${action.selected}". Try re-selecting the action.`);
+        setError(`Could not find action data for "${action.selected}". Try reselecting the action.`);
         return;
     }
     if (!actionData) { actionData = action.selected; }

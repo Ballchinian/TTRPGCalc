@@ -1,155 +1,129 @@
 # Pathfinder 2e Combat Calculator
 
-A full stack Pathfinder Second Edition combat toolkit. Build characters and their weapons and spells, assemble two parties, then run an encounter turn by turn through a rules-accurate resolution engine that handles damage, conditions, saves, item runes, and class features with a combat log and round-by-round recap.
+A web app for building Pathfinder Second Edition characters and running fights with them. You make your characters, give them weapons and spells, drop them into two parties, and play out an encounter turn by turn. The server does the actual rules work, the damage, conditions, saves, runes, and class features, so the numbers land the way the book says they should. You get a combat log and a round-by-round recap of how it all went.
 
 ## Features
 
-* Character builder (HP, AC, saves, skills, resistances, weaknesses, immunities, class options, portrait upload)
-* Weapon and spell action builder (traits, runes, critical specialization, versatile damage, saving throws, healing, conditions)
-* Character import from Pathbuilder 2e (by export code or pasted JSON) and Foundry VTT
-* Turn-based battle simulator with two parties, an initiative tracker, action economy, and multiple attack penalty
-* Three resolution modes: Average, Luck, and Choose
-* PF2e rules engine: resistance / weakness / immunity, condition hierarchy, basic saves, persistent damage, off-guard, temporary HP
-* Class features and stances (Rage, Panache and Finishers, Sneak Attack, Hunt Prey, and more)
-* Combat log, round-by-round recap, and expiring-condition tracking
-* Saved battles (up to five per account)
-* Account system with secure session handling and email password reset
+- Character builder: HP, AC, saves, skills, resistances, weaknesses, immunities, a class option, and a portrait you can upload and crop
+- Weapon and spell builder with traits, runes, critical specialization, versatile damage, saving throws, healing, and conditions
+- Import straight from Pathbuilder 2e (export code or pasted JSON) or Foundry VTT
+- Turn-based battle simulator: two parties, initiative tracking, action economy, and the multiple attack penalty
+- Three ways to resolve an action: averaged, rolled, or pick the outcome yourself
+- The PF2e rules that actually matter in a fight: resistance, weakness, immunity, the condition hierarchy, basic saves, persistent damage, off-guard, temporary HP
+- Class features and stances: Rage, Panache and Finishers, Sneak Attack, Hunt Prey, and more
+- Combat log, round-by-round recap, and a heads-up on conditions about to expire
+- Up to five saved battles per account
+- Accounts with proper session handling and email password reset
 
-## Documentation
+Endpoint docs live in [ENDPOINTS.md](./ENDPOINTS.md).
 
-* [API Endpoints](./ENDPOINTS.md)
+## How a turn gets resolved
 
----
+The server has the final say. The frontend never works out what an action does, it just sends who's acting, who they're hitting, and which action they picked. The backend looks the action back up from the database (so a client can't sneak in made-up effects), applies the bonuses and conditions, rolls or averages the dice, and hands back the updated combatants, a formatted log, and per-target stats.
 
-# How the Resolution Engine Works
+Every action runs through the same steps:
 
-The server is authoritative. The frontend never resolves an action itself, it sends the actor, targets, and chosen action to the backend, which refetches the action from the database (so a client can't inject arbitrary effects), applies bonuses and conditions, rolls or averages the dice, then returns the updated combatants, a formatted log, and per-target statistics.
+1. Apply the actor's offensive bonuses and each target's defensive ones.
+2. Turn the action into per-target effects: damage, healing, conditions, temp HP.
+3. Resolve each effect against the target's resistances, weaknesses, and immunities.
+4. Layer on class-feature riders (precision damage, stance bonuses) and critical specialization.
+5. Build the log and stats, and return the updated combatants.
 
-Every action runs through the same pipeline:
+### Resolution modes
 
-1. Apply offensive bonuses to the actor and defensive bonuses to each target.
-2. Format the action into per-target effects (damage, healing, conditions, temp HP).
-3. Resolve each effect, applying the target's resistances, weaknesses, and immunities.
-4. Apply class-feature riders (precision damage, stance bonuses) and critical specialization.
-5. Build the log and stats, and return the mutated combatants.
+You choose how the dice get handled, per action.
 
-### Resolution Modes
+| Mode | What it does |
+| --- | --- |
+| Average | Deterministic expected values. The quickest way to weigh up two options. |
+| Luck | Rolls real dice, down to the per-die results you see in the hover breakdown. |
+| Choose | You call the outcome (crit success, success, failure, crit failure) for each target, and the effects worked out for that outcome get applied. |
 
-| Mode    | Behaviour                                                                  |
-| ------- | -------------------------------------------------------------------------- |
-| Average | Deterministic expected values - the fastest way to compare options.        |
-| Luck    | Rolls real dice, including per-die results for the hover breakdown.         |
-| Choose  | You pick the outcome (critical success / success / failure / critical failure) for each target, and the pre-computed effects for that outcome are applied. |
+### Damage
 
-### Damage Modifiers
+Damage follows the PF2e order: add weakness, subtract resistance, then clamp at zero so a hit never heals. Immunity skips all of that and zeroes the damage outright. Type matching ignores case.
 
-Damage modifiers follow the PF2e order: weakness is added, resistance is subtracted, and the total is clamped at zero. Immunity zeroes the damage and overrides both. Type matching is case-insensitive.
+## Conditions and durations
 
----
+Conditions sit on each combatant with a value (when one applies) and a duration that decides when they fall off. The engine enforces the condition hierarchy, so a worse condition removes and suppresses the lighter ones it covers. Restrained, for instance, takes grabbed and immobilized off the combatant, and trying to add either back is ignored while restrained is still there.
 
-# Conditions & Durations
+| Duration | When it ends |
+| --- | --- |
+| `manual` | Only when you remove it |
+| `decrement` | Drops by one at end of turn, gone at zero |
+| `rounds` | After a set number of rounds |
+| `endOfRound` | At the end of the current round |
+| `endOfNextTurn` | At the end of the applying actor's next turn |
+| `startOfTargetTurn` | At the start of the affected creature's turn |
+| `flatCheck` | When a recovery flat check passes |
 
-Conditions are stored on each combatant with a value (where applicable) and a duration that decides when they expire. The engine enforces the PF2e condition hierarchy, a more severe condition removes and suppresses the ones it covers (for example, **restrained** removes **grabbed** and **immobilized**, and readding the lesser condition is ignored while the greater one is present).
+Off-guard is tracked by where it came from. It sticks around as long as anything granting it (prone, grabbed, restrained, and so on) is still active, and clears once the last source is gone.
 
-| Duration Type      | Expires                                                        |
-| ------------------ | ------------------------------------------------------------- |
-| `manual`           | Never automatically, removed by hand                         |
-| `decrement`        | Value drops by one at end of turn; cleared at zero            |
-| `rounds`           | After a set number of rounds                                  |
-| `endOfRound`       | At the end of the current round                               |
-| `endOfNextTurn`    | At the end of the applying actor's next turn                  |
-| `startOfTargetTurn`| At the start of the afflicted creature's turn                 |
-| `flatCheck`        | When a recovery flat check succeeds                           |
+Persistent damage lands at the end of each round, adjusted for resistance and weakness, followed by a recovery flat check (DC 15 by default). The same damage type doesn't stack, it keeps the higher value.
 
-**Off-guard** is tracked by source: it persists as long as any condition that grants it (prone, grabbed, restrained, and so on) is still present, and clears once the last source is gone.
+## Runes and item bonuses
 
-**Persistent damage** is applied at the end of each round, adjusted for resistance and weakness, followed by a recovery flat check (default DC 15). The same damage type does not stack, the higher value is kept.
+Weapon and armour runes live on the item and get folded into the right rolls during resolution, so you can still see what they're contributing instead of it vanishing into one lump number.
 
----
+| Rune | What it does |
+| --- | --- |
+| Potency | Item bonus to attack rolls (rank 0 to 3) |
+| Striking | Extra weapon damage dice (striking, greater, major) |
+| Resilient | Item bonus to saves (rank 0 to 3), folded in during the fight |
 
-# Runes & Item Bonuses
+## Class features
 
-Weapon and armour runes are stored on the item and folded into the relevant rolls during resolution, so their contribution stays visible rather than being baked into a single number.
+A character can take one class option, which hands them extra actions, a stance, or conditional Strike damage. Features are plain data in a single registry, so the resolver and the UI both read from the same place.
 
-| Rune       | Effect                                                          |
-| ---------- | -------------------------------------------------------------- |
-| Potency    | Item bonus to attack rolls (rank 0-3)                          |
-| Striking   | Adds extra weapon damage dice (striking / greater / major)     |
-| Resilient  | Item bonus to saving throws (rank 0-3), folded in during battle |
+| Class | Feature |
+| --- | --- |
+| Swashbuckler | Panache, Precise Strike, and Finishers (Rascal, Braggart, Gymnast, Fencer, Battledancer, Wit) |
+| Barbarian | Rage: temp HP plus extra melee and unarmed Strike damage |
+| Rogue | Sneak Attack: precision dice against an off-guard target |
+| Ranger | Hunt Prey and the Precision hunter's edge |
+| Investigator | Devise a Stratagem: precision dice on your next Strike |
+| Thaumaturge | Exploit Vulnerability |
+| Inventor | Overdrive |
+| Magus | Arcane Cascade stance |
+| Bard | Courageous Anthem for allies |
 
----
+Everyone, whatever their class, can Grapple, Trip, Demoralize, Stand, and Escape.
 
-# Class Features
+## Accounts
 
-A character can take one class option, which grants extra actions, stances, or conditional Strike damage. Features are declarative data, so the resolver and UI both read from one registry.
+Accounts use short-lived access tokens with rotating refresh tokens.
 
-| Class         | Feature                                                                 |
-| ------------- | ----------------------------------------------------------------------- |
-| Swashbuckler  | Panache, Precise Strike, and Finishers (Rascal, Braggart, Gymnast, Fencer, Battledancer, and Wit styles) |
-| Barbarian     | Rage - temporary HP plus extra melee and unarmed Strike damage          |
-| Rogue         | Sneak Attack - precision dice against an off-guard target               |
-| Ranger        | Hunt Prey and the Precision hunter's edge                               |
-| Investigator  | Devise a Stratagem - precision dice on your next Strike                  |
-| Thaumaturge   | Exploit Vulnerability                                                    |
-| Inventor      | Overdrive                                                                |
-| Magus         | Arcane Cascade stance                                                    |
-| Bard          | Courageous Anthem - inspired courage for allies                         |
+- Passwords are hashed with bcrypt.
+- The access token is a JWT kept in memory and good for 15 minutes.
+- The refresh token lives in an httpOnly cookie for 7 days and rotates on every refresh. Only a hash of it is stored, so a database leak can't be turned into a hijacked session.
+- Password resets go out by email with a single-use, time-limited token, and finishing a reset logs out every active session.
+- The auth and import routes are rate limited.
 
-Global actions available to everyone include Grapple, Trip, Demoralize, Stand, and Escape.
+## A battle, start to finish
 
----
+You add characters to a battle as **heroes** or **foes**, and duplicate names get sorted out automatically. The whole battle (parties, round, initiative, and settings) is saved locally and tied to whoever's logged in.
 
-# Authentication
+Initiative can be rolled off Perception, rolled on a flat d20, or just dragged into whatever order you want. Ties go to the higher Perception, then a coin flip.
 
-Accounts use short lived access tokens with rotating refresh tokens.
+On a turn you choose an actor, an action, and the targets, then resolve. Action economy and the multiple attack penalty are tracked for you, and you can switch that off if you'd rather. Run someone out of actions and initiative moves on to the next combatant.
 
-* Passwords are hashed with bcrypt.
-* The access token is a JWT held in memory and expires after 15 minutes.
-* A refresh token is stored in an httpOnly cookie (7 day lifetime) and rotated on every refresh; only a hash of it is kept in the database, so a database leak cannot be used to hijack sessions.
-* Password reset is delivered by email with a single use, time limited token; completing a reset invalidates all active sessions.
-* Authentication and import routes are rate limited.
+Ending the round ticks every duration, applies persistent damage and its recovery checks, clears spent conditions, and gives everyone their actions back. Lost actions from slowed and stunned get applied here too.
 
----
+Every action you resolve goes into a round-by-round recap with the damage, healing, and condition changes. Save a battle (up to five) and you can load it back later.
 
-# Battle Lifecycle
-
-## Setup
-
-Characters are added to a battle as **heroes** or **foes**. Duplicate names are disambiguated automatically. The battle (parties, round, initiative, and settings) persists locally and is scoped to the logged in user.
-
-## Initiative
-
-Initiative can be rolled by Perception, rolled with a d20, or arranged manually with drag to reorder. Ties break on the higher Perception, then a coin flip.
-
-## Turns
-
-On a turn you pick an actor, an action, and its targets, then resolve. Action economy and the multiple attack penalty are tracked automatically (and can be toggled off). Running an actor out of actions advances initiative to the next combatant.
-
-## End of Round
-
-Ending the round ticks every duration, applies persistent damage and its recovery flat checks, clears spent conditions, and refreshes everyone's actions. Start of turn action loss from slowed and stunned is applied here as well.
-
-## Recap
-
-Every resolved action is recorded in a round by round recap with damage dealt, healing, and condition changes. Battles can be saved (up to five) and reloaded later.
-
----
-
-# Typical Flow
+## A typical session
 
 1. Build or import your characters.
-2. Create their weapons and spells in the Action Builder.
-3. Add characters to a battle as heroes and foes.
+2. Give them weapons and spells in the Action Builder.
+3. Add them to a battle as heroes and foes.
 4. Roll initiative.
-5. On each turn, select an actor, an action, and the targets.
-6. Resolve: the engine applies damage, conditions, and class-feature effects.
-7. End the round to tick durations and resolve persistent damage.
-8. Review the recap, and save the battle to revisit it later.
+5. On each turn, pick an actor, an action, and the targets.
+6. Resolve, and let the engine handle damage, conditions, and class-feature effects.
+7. End the round to tick durations and deal persistent damage.
+8. Read the recap, and save the battle if you want to come back to it.
 
----
+## Tech
 
-# Tech Stack
-
-* **Frontend:** React 19, Vite, Zustand, React Router, Bootstrap
-* **Backend:** Node.js, Express, MongoDB (Mongoose), JSON Web Tokens, Cloudinary
-* **Testing:** Node's built-in test runner (backend), Vitest (frontend)
+- **Frontend:** React 19, Vite, Zustand, React Router, Bootstrap
+- **Backend:** Node.js, Express, MongoDB with Mongoose, JSON Web Tokens, Cloudinary
+- **Tests:** Node's built-in test runner on the backend, Vitest on the frontend

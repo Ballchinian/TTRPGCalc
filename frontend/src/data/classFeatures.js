@@ -94,7 +94,7 @@ export const getFeatureConfigFields = (featureId) => CLASS_FEATURES[featureId]?.
 export const getStrikeRider = (classOption) => featureOf(classOption)?.strikeRider ?? null;
 
 //Names of feature/style actions this character gains (Barbarian Rage, Rascal Dirty Trick/Tumble
-//Through, ...). The action panel merges these into the list and de-dupes against the global actions.
+//Through, ...). The action panel merges these into the list and dedupes against the global actions.
 export function getFeatureActions(classOption) {
     const f = featureOf(classOption);
     if (!f) return [];

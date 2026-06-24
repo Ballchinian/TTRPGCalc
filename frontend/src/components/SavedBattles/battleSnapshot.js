@@ -65,7 +65,7 @@ export function currentBattleHasContent() {
 }
 
 //Aggregates a recap history ({ [round]: [entries] }) into comparison metrics. Damage figures come
-//straight from the recap entries the simulator already computes, so this never re-resolves anything.
+//straight from the recap entries the simulator already computes, so this never resolves anything again.
 //`parties` (the saved battle's { heroes, foes }) lets us split damage output by the acting side; names
 //are unique across both parties, so actorName -> side is unambiguous. Omit it and the split stays 0.
 export function summarizeRecap(recap = {}, parties = null) {

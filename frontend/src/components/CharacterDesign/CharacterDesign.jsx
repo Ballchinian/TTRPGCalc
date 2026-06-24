@@ -376,7 +376,7 @@ function CharacterDesign() {
     };
 
     //Picking a file opens the crop modal rather than uploading straight away - the user frames the
-    //portrait to the card's 4:5 ratio first. Reset the input value so re-picking the same file fires.
+    //portrait to the card's 4:5 ratio first. Reset the input value so repicking the same file fires.
     function handleImageSelect(e) {
         const file = e.target.files[0];
         e.target.value = "";

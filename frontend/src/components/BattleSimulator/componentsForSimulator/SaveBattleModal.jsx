@@ -14,7 +14,7 @@ const fmtDate = (d) => (d ? new Date(d).toLocaleString() : "");
     Save dialog launched from the Recap. Saving lives here (in the simulator) rather than in Saved
     Battles, which is now management-only. One name field plus a "save to" picker handles every case:
     a new slot, or overwriting any existing one. The target defaults to the slot this battle was
-    loaded from (loadedBattle), so re-saving a loaded battle is one click; picking a slot pre-fills
+    loaded from (loadedBattle), so resaving a loaded battle is one click; picking a slot prefills
     its name (editable) so an overwrite keeps the old name unless you rename it.
 */
 function SaveBattleModal({ show, onHide, onSaved }) {
@@ -61,7 +61,7 @@ function SaveBattleModal({ show, onHide, onSaved }) {
         return () => { cancelled = true; };
     }, [show, loadedBattle]);
 
-    //Picking a target pre-fills the name: a slot's existing name (editable), or blank for a new slot.
+    //Picking a target prefills the name: a slot's existing name (editable), or blank for a new slot.
     const chooseTarget = (value) => {
         setTarget(value);
         setName(value === NEW_SLOT ? "" : (battles.find(b => b._id === value)?.name ?? ""));

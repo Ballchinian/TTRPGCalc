@@ -51,7 +51,7 @@ export const createSavedBattle = async (req, res) => {
     }
 };
 
-//Overwrite an existing slot (re-saving a loaded battle) without consuming another of the 5 slots.
+//Overwrite an existing slot (resaving a loaded battle) without consuming another of the 5 slots.
 export const updateSavedBattle = async (req, res) => {
     try {
         if (!isValidId(req.params.id)) return res.status(400).json({ message: "Invalid battle ID" });

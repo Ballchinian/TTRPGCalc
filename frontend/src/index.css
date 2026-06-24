@@ -40,7 +40,7 @@
 
 /* App-owned semantic colour tokens. These alias the Bootstrap theme vars above (or set a
    literal) so inline styles in JSX and the CSS share one source of truth instead of each
-   re-typing the hex. Consume from an inline style with e.g. color: "var(--app-text)". */
+   retyping the hex. Consume from an inline style with e.g. color: "var(--app-text)". */
 :root {
   --app-success: var(--bs-success);   /* #28a745  positive / confirm (also used on hover)  */
   --app-text: var(--bs-body-color);   /* #a6c0b7  default grey-green body text              */

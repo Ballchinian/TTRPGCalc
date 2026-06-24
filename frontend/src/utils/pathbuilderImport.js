@@ -1,7 +1,7 @@
 //Maps a Pathbuilder 2e export ("build" object, from the 6-digit code API or a downloaded
 //.json) onto this app's character shape. Pathbuilder ships final totals for AC and per-weapon
 //attack (used verbatim); saves/skills/perception are computed from ability scores + proficiency
-//ranks by the fixed PF2e formula. The result pre-fills the editable CharacterDesign form, so the
+//ranks by the fixed PF2e formula. The result prefills the editable CharacterDesign form, so the
 //user reviews every number before saving - nothing is written silently.
 import { RANGED_GROUPS } from "../data/weaponGroups";
 import { CLASS_FEATURES } from "../data/classFeatures";
@@ -160,7 +160,7 @@ export function parsePathbuilder(payload) {
         const ranged = group ? RANGED_GROUPS.has(group) : false;
         const potency = clampRune(w.pot);
         //strHit/dexHit hold the attack bonus WITHOUT the weapon's potency rune - the rune lives on the
-        //weapon and the resolver re-adds it, so the bonus's source stays visible.
+        //weapon and the resolver adds it back, so the bonus's source stays visible.
         const attack = Number(w.attack);
         if (Number.isFinite(attack)) {
             const base = attack - potency;
@@ -177,7 +177,7 @@ export function parsePathbuilder(payload) {
             striking: Math.max(0, strikingDice(w.str) - 1),
             potency,
             //Flat damage bonus from Pathbuilder INCLUDES the ability mod for melee. The import popup
-            //subtracts STR for melee groups (the engine re-injects it) so STR isn't double-counted.
+            //subtracts STR for melee groups (the engine reinjects it) so STR isn't double-counted.
             damageBonus: Number.isFinite(Number(w.damageBonus)) ? Number(w.damageBonus) : null,
         };
     });

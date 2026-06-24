@@ -9,7 +9,7 @@ import { parseFoundry } from "../../utils/foundryImport";
 //Imports a character from a Pathbuilder 2e or Foundry VTT export. Pathbuilder supports a reference
 //code (fetched through the backend proxy, since pathbuilder2e.com sends no CORS headers) or pasting/
 //uploading the exported JSON; Foundry is paste/upload only (exported via right-click -> Export Data).
-//On success it navigates to the new-character form pre-filled via router state - nothing is saved
+//On success it navigates to the new-character form prefilled via router state - nothing is saved
 //until the user reviews and submits that form. Foundry omits a single attack-bonus total, so
 //strHit/dexHit are derived from level + ability + the weapon proficiency chosen here.
 const PROFICIENCIES = ["untrained", "trained", "expert", "master", "legendary"];

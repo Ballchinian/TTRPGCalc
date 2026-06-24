@@ -2,7 +2,7 @@
 //character shape. Foundry ships final totals for AC, saves, perception and skills (used verbatim),
 //but it computes attack bonuses per-strike rather than storing one number - so strHit/dexHit are
 //derived from level + ability mod + a weapon proficiency the user picks in the import dialog. The
-//result pre-fills the editable CharacterDesign form, so the user reviews every number before saving.
+//result prefills the editable CharacterDesign form, so the user reviews every number before saving.
 
 //PF2e proficiency bonus by rank (untrained adds nothing and no level)
 const PROF_BONUS = { untrained: 0, trained: 2, expert: 4, master: 6, legendary: 8 };

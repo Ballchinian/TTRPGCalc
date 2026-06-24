@@ -69,7 +69,7 @@ function ActionPanel() {
     const critSpecDef = selectedWeaponGroup ? (CRIT_SPEC_DEFS[selectedWeaponGroup] ?? null) : null;
     const showCritSpec = action.selectedType === "weapon";
 
-    //Memoize localStorage read: getLocalActionNames re-parses JSON on every call
+    //Memoize localStorage read: getLocalActionNames reparses JSON on every call
     //Use actor id as dep, not the object reference (new object every render)
     //Deletion cleanup is handled by cleanupBattleSession in useActionBuilder, no need to filter here
     const { selectedWeapons, selectedSpells } = useMemo(() => {

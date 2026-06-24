@@ -293,7 +293,7 @@ export const useBattleStore = create(
             //Target and action selection
 
             toggleTargetActiveActor: () => set(state => ({
-                //MAP is NOT reset here, it persists across re-selections of the same actor
+                //MAP is NOT reset here, it persists across reselections of the same actor
                 //within a round, only resetting when a DIFFERENT actor takes a turn or at endRound
                 action: { selected: "", selectedType: "", targetType: "", choosing: false },
                 target: {
@@ -379,7 +379,7 @@ export const useBattleStore = create(
                     if (alreadySelected) {
                         return { target: { ...state.target, selectedTargetCharacters: selectedTargetCharacters.filter(c => !(c.side === side && c.id === id)) } };
                     }
-                    //Single target: always replace rather than append so re-entering mode cant stack targets
+                    //Single target: always replace rather than append so reentering mode cant stack targets
                     const base = state.action.targetType === "single" ? [] : selectedTargetCharacters;
                     const newTargets = [...base, selectedChar || { side, id, sourceID }];
                     const exitMode = state.action.targetType === "single";

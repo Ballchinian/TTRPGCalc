@@ -31,7 +31,7 @@ const skipBtnStyle = { padding: "6px 16px", fontSize: "13px", backgroundColor: "
 
 //Builds the weapon Action payload (mirrors WeaponBuilder.handleSaveWeapon). The potency/striking runes
 //are stored as fields (the resolver applies them); Pathbuilder's flat damageBonus includes the ability
-//mod for melee, so subtract STR for melee groups - the resolver re-injects it.
+//mod for melee, so subtract STR for melee groups - the resolver reinjects it.
 function buildPayload(w, strMod) {
     const group = w.group || "";
     const ranged = RANGED_GROUPS.has(group);

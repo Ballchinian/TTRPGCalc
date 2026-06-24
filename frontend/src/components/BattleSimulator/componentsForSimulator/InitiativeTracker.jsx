@@ -99,7 +99,7 @@ function InitiativeTracker() {
                                     textDecoration: dead || missing ? "line-through" : "none",
                                     cursor: missing ? "default" : "pointer",
                                 }}
-                                title={missing ? "Removed from the battle - re-roll to refresh" : dead ? "Down" : ""}
+                                title={missing ? "Removed from the battle - reroll to refresh" : dead ? "Down" : ""}
                             >
                                 <span style={handleStyle}>≡</span>
                                 <span style={{ width: "16px", color: "rgba(255,255,255,0.4)" }}>{i + 1}</span>

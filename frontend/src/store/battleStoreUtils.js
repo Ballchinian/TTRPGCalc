@@ -36,7 +36,7 @@ export function createBattleCharacter(char, side, displayName) {
         stats: {
             ...foldResilientSaves(char.stats),
             //Optional chaining guards against pre-namespacing characters so they degrade to 0 HP
-            //(prompting a re-save) instead of crashing the battle UI
+            //(prompting a resave) instead of crashing the battle UI
             maxHealth: char.stats.attributes?.hp ?? 0,
             currentHealth: char.stats.attributes?.hp ?? 0,
         },
