@@ -1,6 +1,6 @@
 # TTRPG Combat Calculator
 
-A web app for building tabletop RPG characters and running fights with them. You make your characters, give them weapons and spells, drop them into two parties, and play out an encounter turn by turn. The server does the actual rules work, the damage, conditions, saves, runes, and class features, so the numbers land the way the book says they should. You get a combat log and a round-by-round recap of how it all went.
+A web app for building tabletop RPG characters and running fights with them. You make your characters, give them weapons and spells, drop them into two parties, and play out an encounter turn by turn. The server does the actual rules work — the damage, conditions, saves, runes, and class features — so the numbers land the way the book says they should. You get a combat log and a round-by-round recap of how it all went.
 
 ## Features
 
@@ -17,9 +17,9 @@ A web app for building tabletop RPG characters and running fights with them. You
 
 Endpoint docs live in [ENDPOINTS.md](./ENDPOINTS.md).
 
-## How a turn gets resolved
+## How it works
 
-The server has the final say. The frontend never works out what an action does, it just sends who's acting, who they're hitting, and which action they picked. The backend looks the action back up from the database (so a client can't sneak in made-up effects), applies the bonuses and conditions, rolls or averages the dice, and hands back the updated combatants, a formatted log, and per-target stats.
+The server has the final say. The frontend never works out what an action does — it just sends who's acting, who they're hitting, and which action they picked. The backend looks the action back up from the database (so a client can't sneak in made-up effects), applies the bonuses and conditions, rolls or averages the dice, and hands back the updated combatants, a formatted log, and per-target stats.
 
 Every action runs through the same steps:
 
@@ -37,7 +37,7 @@ You choose how the dice get handled, per action.
 | --- | --- |
 | Average | Deterministic expected values. The quickest way to weigh up two options. |
 | Luck | Rolls real dice, down to the per-die results you see in the hover breakdown. |
-| Choose | You call the outcome (crit success, success, failure, crit failure) for each target, and the effects worked out for that outcome get applied. |
+| Choose | You call the outcome (crit success, success, failure, crit failure) for each target, and the effects for that outcome get applied. |
 
 ### Damage
 
@@ -59,7 +59,7 @@ Conditions sit on each combatant with a value (when one applies) and a duration 
 
 Off-guard is tracked by where it came from. It sticks around as long as anything granting it (prone, grabbed, restrained, and so on) is still active, and clears once the last source is gone.
 
-Persistent damage lands at the end of each round, adjusted for resistance and weakness, followed by a recovery flat check (DC 15 by default). The same damage type doesn't stack, it keeps the higher value.
+Persistent damage lands at the end of each round, adjusted for resistance and weakness, followed by a recovery flat check (DC 15 by default). The same damage type doesn't stack — it keeps the higher value.
 
 ## Runes and item bonuses
 
@@ -99,7 +99,7 @@ Accounts use short-lived access tokens with rotating refresh tokens.
 - Password resets go out by email with a single-use, time-limited token, and finishing a reset logs out every active session.
 - The auth and import routes are rate limited.
 
-## A battle, start to finish
+## Running a battle
 
 You add characters to a battle as **heroes** or **foes**, and duplicate names get sorted out automatically. The whole battle (parties, round, initiative, and settings) is saved locally and tied to whoever's logged in.
 
@@ -111,6 +111,12 @@ Ending the round ticks every duration, applies persistent damage and its recover
 
 Every action you resolve goes into a round-by-round recap with the damage, healing, and condition changes. Save a battle (up to five) and you can load it back later.
 
+## Tech stack
+
+- **Frontend:** React 19, Vite, Zustand, React Router, Bootstrap
+- **Backend:** Node.js, Express, MongoDB with Mongoose, JSON Web Tokens, Cloudinary
+- **Tests:** Node's built-in test runner on the backend, Vitest on the frontend
+
 ## A typical session
 
 1. Build or import your characters.
@@ -121,9 +127,3 @@ Every action you resolve goes into a round-by-round recap with the damage, heali
 6. Resolve, and let the engine handle damage, conditions, and class-feature effects.
 7. End the round to tick durations and deal persistent damage.
 8. Read the recap, and save the battle if you want to come back to it.
-
-## Tech
-
-- **Frontend:** React 19, Vite, Zustand, React Router, Bootstrap
-- **Backend:** Node.js, Express, MongoDB with Mongoose, JSON Web Tokens, Cloudinary
-- **Tests:** Node's built-in test runner on the backend, Vitest on the frontend
